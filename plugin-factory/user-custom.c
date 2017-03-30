@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "parser.h"
 
@@ -63,6 +64,7 @@ cheapscala(const struct parser_param *param)
     char buf[1024], saveline[1024], *token;
     int lineno = 0;
     int next_symbol_is_class = 0;
+    bool is_comment = false;
     assert(param->size >= sizeof(*param));
     ip = fopen(param->file, "r");
     if (ip == NULL)
@@ -75,6 +77,17 @@ cheapscala(const struct parser_param *param)
         buf[strlen(buf) - 1] = '\0';
         strcpy(saveline, buf);
         for (token = strtok(line, LIM); token != NULL; token = strtok(NULL, LIM)) {
+            if (!strcmp(token, "/*")) {
+                is_comment = true;
+                continue;
+            }
+            if (!strcmp(token, "*/")) {
+                is_comment = false;
+                continue;
+            }
+            if (is_comment) {
+                break;
+            }
             if (!strcmp(token, "//"))
                 break;
             if (isdigit(*token))
