@@ -18,7 +18,7 @@ Here treat the latest version as 6.5.6.
 
 Copy `plugin-factory/user-custom.c` to `global-6.5.6/plugin-factory/user-custom.c`.
 
-And then, as always, fire the following command lines under the global-6.5.6.
+And then, as always, fire Following command lines under the global-6.5.6.
 
 ```
 ./configure --prefix=/Users/Shared/global
@@ -27,7 +27,7 @@ make install
 
 #### How to use
 
-The following command lines is usage example:
+Following command lines is usage example:
 
 ```
 cp cheapscala/gtags.conf ~/.globalrc
