@@ -18,40 +18,40 @@
 void
 cheapruby(const struct parser_param *param)
 {
-	FILE *ip;
-	char buf[1024], saveline[1024], *token;
-	int lineno = 0;
-	int next_symbol_is_definition = 0;
-	assert(param->size >= sizeof(*param));
-	ip = fopen(param->file, "r");
-	if (ip == NULL)
-		param->die("cannot open file '%s'", param->file);
-	while (fgets(buf, sizeof(buf), ip)) {
-		char *p, *line = buf;
-		int def = 0;
+    FILE *ip;
+    char buf[1024], saveline[1024], *token;
+    int lineno = 0;
+    int next_symbol_is_definition = 0;
+    assert(param->size >= sizeof(*param));
+    ip = fopen(param->file, "r");
+    if (ip == NULL)
+        param->die("cannot open file '%s'", param->file);
+    while (fgets(buf, sizeof(buf), ip)) {
+        char *p, *line = buf;
+        int def = 0;
 
-		lineno++;
-		buf[strlen(buf) - 1] = '\0';
-		strcpy(saveline, buf);
-		for (token = strtok(line, LIM); token != NULL; token = strtok(NULL, LIM)) {
-			if (*token == '#')
-				break;
-			if (isdigit(*token))
-				continue;
-			if (*token == '\'')
-				continue;
-			if (!strcmp(token, "while") || !strcmp(token, "end"))
-				continue;
-			if (!strcmp(token, "def")) {
-				next_symbol_is_definition = 1;
-				continue;
-			}
-			if (isalpha(*token)) {
-				param->put(next_symbol_is_definition ? PARSER_DEF : PARSER_REF_SYM,
-					token, lineno, param->file, saveline, param->arg);
-				next_symbol_is_definition = 0;
-			}
-		}
-	}
-	fclose(ip);
+        lineno++;
+        buf[strlen(buf) - 1] = '\0';
+        strcpy(saveline, buf);
+        for (token = strtok(line, LIM); token != NULL; token = strtok(NULL, LIM)) {
+            if (*token == '#')
+                break;
+            if (isdigit(*token))
+                continue;
+            if (*token == '\'')
+                continue;
+            if (!strcmp(token, "while") || !strcmp(token, "end"))
+                continue;
+            if (!strcmp(token, "def")) {
+                next_symbol_is_definition = 1;
+                continue;
+            }
+            if (isalpha(*token)) {
+                param->put(next_symbol_is_definition ? PARSER_DEF : PARSER_REF_SYM,
+                    token, lineno, param->file, saveline, param->arg);
+                next_symbol_is_definition = 0;
+            }
+        }
+    }
+    fclose(ip);
 }
