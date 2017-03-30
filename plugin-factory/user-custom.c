@@ -5,7 +5,7 @@
 
 #include "parser.h"
 
-#define LIM " \t()"
+#define LIM " \t(){}."
 
 /*
  * NOP PARSER
@@ -21,7 +21,7 @@ cheapruby(const struct parser_param *param)
     FILE *ip;
     char buf[1024], saveline[1024], *token;
     int lineno = 0;
-    int next_symbol_is_definition = 0;
+    int next_symbol_is_class = 0;
     assert(param->size >= sizeof(*param));
     ip = fopen(param->file, "r");
     if (ip == NULL)
@@ -42,14 +42,14 @@ cheapruby(const struct parser_param *param)
                 continue;
             if (!strcmp(token, "while") || !strcmp(token, "end"))
                 continue;
-            if (!strcmp(token, "def")) {
-                next_symbol_is_definition = 1;
+            if (!strcmp(token, "class")) {
+                next_symbol_is_class = 1;
                 continue;
             }
             if (isalpha(*token)) {
-                param->put(next_symbol_is_definition ? PARSER_DEF : PARSER_REF_SYM,
+                param->put(next_symbol_is_class ? PARSER_DEF : PARSER_REF_SYM,
                     token, lineno, param->file, saveline, param->arg);
-                next_symbol_is_definition = 0;
+                next_symbol_is_class = 0;
             }
         }
     }
