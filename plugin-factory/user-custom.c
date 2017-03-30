@@ -6,7 +6,7 @@
 
 #include "parser.h"
 
-#define LIM " \t(){}."
+#define LIM " \t(){}[].,:;"
 
 /*
  * NOP PARSER
@@ -99,7 +99,23 @@ cheapscala(const struct parser_param *param)
                 continue;
             if (*token == '\"')
                 continue;
-            if (!strcmp(token, "while") || !strcmp(token, "new"))
+            if (!strcmp(token, "String") ||
+                    !strcmp(token, "Char") ||
+                    !strcmp(token, "Double") ||
+                    !strcmp(token, "Float") ||
+                    !strcmp(token, "Long") ||
+                    !strcmp(token, "Int") ||
+                    !strcmp(token, "Short") ||
+                    !strcmp(token, "Byte") ||
+                    !strcmp(token, "Boolean") )
+                continue;
+            if (!strcmp(token, "while") ||
+                    !strcmp(token, "for") ||
+                    !strcmp(token, "new") ||
+                    !strcmp(token, "val") ||
+                    !strcmp(token, "var") ||
+                    !strcmp(token, "override") ||
+                    !strcmp(token, "extends") )
                 continue;
             if (!strcmp(token, "class")) {
                 next_symbol_is_class = 1;
