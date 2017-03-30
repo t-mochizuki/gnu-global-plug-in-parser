@@ -4,6 +4,10 @@
  * scalac Main.scala&&scala HelloWorld
  */
 
+trait Tree
+object Node extends Tree
+class Leaf(value: String) extends Tree
+
 object Huga {
   def bye() = println("Good bye!")
 }

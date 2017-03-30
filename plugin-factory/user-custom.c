@@ -65,6 +65,8 @@ cheapscala(const struct parser_param *param)
     int lineno = 0;
     int next_symbol_is_class = 0;
     int next_symbol_is_object = 0;
+    int next_symbol_is_trait = 0;
+    int next_symbol_is_function = 0;
     bool is_comment = false;
     assert(param->size >= sizeof(*param));
     ip = fopen(param->file, "r");
@@ -107,6 +109,14 @@ cheapscala(const struct parser_param *param)
                 next_symbol_is_object = 1;
                 continue;
             }
+            if (!strcmp(token, "trait")) {
+                next_symbol_is_trait = 1;
+                continue;
+            }
+            if (!strcmp(token, "def")) {
+                next_symbol_is_function = 1;
+                continue;
+            }
             if (isalpha(*token)) {
                 if (next_symbol_is_class) {
                     param->put(PARSER_DEF,
@@ -117,6 +127,16 @@ cheapscala(const struct parser_param *param)
                     param->put(PARSER_DEF,
                             token, lineno, param->file, saveline, param->arg);
                     next_symbol_is_object = 0;
+                }
+                else if (next_symbol_is_trait) {
+                    param->put(PARSER_DEF,
+                            token, lineno, param->file, saveline, param->arg);
+                    next_symbol_is_trait = 0;
+                }
+                else if (next_symbol_is_function) {
+                    param->put(PARSER_DEF,
+                            token, lineno, param->file, saveline, param->arg);
+                    next_symbol_is_function = 0;
                 }
                 else {
                     param->put(PARSER_REF_SYM,
