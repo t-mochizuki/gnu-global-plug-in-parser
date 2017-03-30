@@ -80,11 +80,11 @@ cheapscala(const struct parser_param *param)
         buf[strlen(buf) - 1] = '\0';
         strcpy(saveline, buf);
         for (token = strtok(line, LIM); token != NULL; token = strtok(NULL, LIM)) {
-            if (!strcmp(token, "/*")) {
+            if (strstr(token, "/*") != NULL) {
                 is_comment = true;
                 continue;
             }
-            if (!strcmp(token, "*/")) {
+            if (strstr(token, "*/") != NULL) {
                 is_comment = false;
                 continue;
             }
