@@ -104,7 +104,7 @@ cheapscala(const struct parser_param *param)
                     ;
                 continue;
             }
-            if (!strcmp(token, "String") ||
+            if (!strcmp(token, "AnyVal") ||
                     !strcmp(token, "Char") ||
                     !strcmp(token, "Double") ||
                     !strcmp(token, "Float") ||
@@ -114,12 +114,32 @@ cheapscala(const struct parser_param *param)
                     !strcmp(token, "Byte") ||
                     !strcmp(token, "Boolean") )
                 continue;
+            if (!strcmp(token, "Any") ||
+                    !strcmp(token, "AnyRef") ||
+                    !strcmp(token, "ScalaObject") ||
+                    !strcmp(token, "String") ||
+                    !strcmp(token, "Iterable") ||
+                    !strcmp(token, "Seq") ||
+                    !strcmp(token, "Nil") ||
+                    !strcmp(token, "List") ||
+                    !strcmp(token, "Array") ||
+                    !strcmp(token, "Vector") ||
+                    !strcmp(token, "Map") ||
+                    !strcmp(token, "Set") ||
+                    !strcmp(token, "Option") ||
+                    !strcmp(token, "Some") ||
+                    !strcmp(token, "None") ||
+                    !strcmp(token, "Null") ||
+                    !strcmp(token, "Nothing") )
+                continue;
             if (!strcmp(token, "while") ||
+                    !strcmp(token, "case") ||
                     !strcmp(token, "for") ||
                     !strcmp(token, "new") ||
                     !strcmp(token, "val") ||
                     !strcmp(token, "var") ||
                     !strcmp(token, "override") ||
+                    !strcmp(token, "abstract") ||
                     !strcmp(token, "extends") )
                 continue;
             if (!strcmp(token, "class")) {
