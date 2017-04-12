@@ -21,8 +21,8 @@ Copy `plugin-factory/user-custom.c` to `global-6.5.6/plugin-factory/user-custom.
 And then, as always, fire the following command lines in `global-6.5.6`.
 
 ```
-./configure --prefix=/Users/Shared/global
-make install
+./configure --prefix=/usr/local/global
+sudo make install
 ```
 
 #### How to use
