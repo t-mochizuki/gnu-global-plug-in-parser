@@ -97,13 +97,8 @@ cheapscala(const struct parser_param *param)
                 continue;
             if (*token == '\'')
                 continue;
-            if (*token == '\"') {
-                if (token[strlen(token) - 1] == '\"' && strlen(token) != 1)
-                    continue;
-                for (token = strtok(NULL, LIM); token != NULL && token[strlen(token) - 1] != '\"'; token = strtok(NULL, LIM))
-                    ;
+            if (*token == '\"')
                 continue;
-            }
             if (!strcmp(token, "AnyVal") ||
                     !strcmp(token, "Char") ||
                     !strcmp(token, "Double") ||
