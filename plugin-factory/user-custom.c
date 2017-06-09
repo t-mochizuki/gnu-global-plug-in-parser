@@ -237,22 +237,22 @@ cheapscala(const struct parser_param *param)
 
         if (next_symbol_is_class) {
             param->put(PARSER_DEF,
-                    token, lineno, param->file, token, param->arg);
+                    token, lineno, param->file, "class", param->arg);
             next_symbol_is_class = 0;
         }
         else if (next_symbol_is_object) {
             param->put(PARSER_DEF,
-                    token, lineno, param->file, token, param->arg);
+                    token, lineno, param->file, "object", param->arg);
             next_symbol_is_object = 0;
         }
         else if (next_symbol_is_trait) {
             param->put(PARSER_DEF,
-                    token, lineno, param->file, token, param->arg);
+                    token, lineno, param->file, "trait", param->arg);
             next_symbol_is_trait = 0;
         }
         else if (next_symbol_is_type) {
             param->put(PARSER_DEF,
-                    token, lineno, param->file, token, param->arg);
+                    token, lineno, param->file, "type", param->arg);
             next_symbol_is_type = 0;
         }
         else {
