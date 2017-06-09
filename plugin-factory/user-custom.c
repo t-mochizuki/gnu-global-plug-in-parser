@@ -65,6 +65,7 @@ cheapscala(const struct parser_param *param)
     int next_symbol_is_class = 0;
     int next_symbol_is_object = 0;
     int next_symbol_is_trait = 0;
+    int next_symbol_is_type = 0;
 
     assert(param->size >= sizeof(*param));
 
@@ -228,6 +229,10 @@ cheapscala(const struct parser_param *param)
             next_symbol_is_trait = 1;
             continue;
         }
+        if (!strcmp(token, "type")) {
+            next_symbol_is_type = 1;
+            continue;
+        }
 
 
         if (next_symbol_is_class) {
@@ -244,6 +249,11 @@ cheapscala(const struct parser_param *param)
             param->put(PARSER_DEF,
                     token, lineno, param->file, token, param->arg);
             next_symbol_is_trait = 0;
+        }
+        else if (next_symbol_is_type) {
+            param->put(PARSER_DEF,
+                    token, lineno, param->file, token, param->arg);
+            next_symbol_is_type = 0;
         }
         else {
             param->put(PARSER_REF_SYM,
