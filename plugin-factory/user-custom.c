@@ -20,42 +20,142 @@
 void
 cheapruby(const struct parser_param *param)
 {
-    FILE *ip;
-    char buf[1024], saveline[1024], *token;
-    int lineno = 0;
+    char token[BUF_SIZE];
     int next_symbol_is_class = 0;
-    assert(param->size >= sizeof(*param));
-    ip = fopen(param->file, "r");
-    if (ip == NULL)
-        param->die("cannot open file '%s'", param->file);
-    while (fgets(buf, sizeof(buf), ip)) {
-        char *p, *line = buf;
-        int def = 0;
+    int next_symbol_is_module = 0;
+    int next_symbol_is_def = 0;
 
-        lineno++;
-        buf[strlen(buf) - 1] = '\0';
-        strcpy(saveline, buf);
-        for (token = strtok(line, LIM); token != NULL; token = strtok(NULL, LIM)) {
-            if (*token == '#')
-                break;
-            if (isdigit(*token))
-                continue;
-            if (*token == '\'')
-                continue;
-            if (!strcmp(token, "while") || !strcmp(token, "end"))
-                continue;
-            if (!strcmp(token, "class")) {
-                next_symbol_is_class = 1;
-                continue;
-            }
-            if (isalpha(*token)) {
-                param->put(next_symbol_is_class ? PARSER_DEF : PARSER_REF_SYM,
-                    token, lineno, param->file, saveline, param->arg);
-                next_symbol_is_class = 0;
-            }
+    assert(param->size >= sizeof(*param));
+
+    FILE *fp;
+    fp = fopen(param->file, "r");
+    if (fp == NULL)
+        param->die("cannot open file '%s'", param->file);
+
+    int c = 0;
+    int lineno = 1;
+    while ((c = fgetc(fp)) != EOF) {
+
+
+        if (c=='\n') {
+            lineno++;
+            continue;
         }
+
+
+        if (isdigit(c)) continue;
+
+
+        if (c=='\"') {
+            while ((c = fgetc(fp)) != EOF) {
+                if (c=='\n') lineno++;
+                if (c=='\"') break;
+            }
+            continue;
+        }
+
+
+        if (c=='\'') {
+            while ((c = fgetc(fp)) != EOF) {
+                if (c=='\'') break;
+            }
+            continue;
+        }
+
+
+        if (c=='#') {
+            while ((c = fgetc(fp)) != EOF) {
+                if (c=='\n') {
+                    lineno++;
+                    break;
+                }
+            }
+            continue;
+        }
+
+
+        if (c=='(') {
+            while ((c = fgetc(fp)) != EOF) {
+                if (c=='\n') lineno++;
+                if (c==')') break;
+            }
+            continue;
+        }
+
+
+        if (c=='[') {
+            while ((c = fgetc(fp)) != EOF) {
+                if (c=='\n') lineno++;
+                if (c==']') break;
+            }
+            continue;
+        }
+
+
+        if (isalpha(c) || c=='_') {
+            token[0] = (char)c;
+            for (int i = 1; i < BUF_SIZE; i++) {
+                c = fgetc(fp);
+                // TODO: やる気があれば英数字以外を追加する
+                if (isalnum(c) || c=='_') {
+                    token[i] = (char)c;
+                } else {
+                    ungetc(c, fp);
+                    token[i] = '\0';
+                    break;
+                }
+            }
+        } else {
+            continue;
+        }
+
+
+        if (!strcmp(token, "while") ||
+                !strcmp(token, "end") ||
+                !strcmp(token, "case") ||
+                !strcmp(token, "for") ||
+                !strcmp(token, "if") ||
+                !strcmp(token, "else") ||
+                !strcmp(token, "elsif") )
+            continue;
+        if (!strcmp(token, "class")) {
+            next_symbol_is_class = 1;
+            continue;
+        }
+        else if (!strcmp(token, "module")) {
+            next_symbol_is_module = 1;
+            continue;
+        }
+        else if (!strcmp(token, "def")) {
+            next_symbol_is_def = 1;
+            continue;
+        }
+
+
+        if (next_symbol_is_class) {
+            param->put(PARSER_DEF,
+                    token, lineno, param->file, "class", param->arg);
+            next_symbol_is_class = 0;
+        }
+        else if (next_symbol_is_module) {
+            param->put(PARSER_DEF,
+                    token, lineno, param->file, "module", param->arg);
+            next_symbol_is_module = 0;
+        }
+        else if (next_symbol_is_def) {
+            param->put(PARSER_DEF,
+                    token, lineno, param->file, "def", param->arg);
+            next_symbol_is_def = 0;
+        }
+        else {
+            param->put(PARSER_REF_SYM,
+                    token, lineno, param->file, token, param->arg);
+        }
+
+
     }
-    fclose(ip);
+    fclose(fp);
+
 }
 
 void
@@ -263,4 +363,160 @@ cheapscala(const struct parser_param *param)
 
     }
     fclose(fp);
+}
+
+void
+cheapshell(const struct parser_param *param)
+{
+    char token[BUF_SIZE];
+    int next_symbol_is_function = 0;
+
+    assert(param->size >= sizeof(*param));
+
+    FILE *fp;
+    fp = fopen(param->file, "r");
+    if (fp == NULL)
+        param->die("cannot open file '%s'", param->file);
+
+    int c = 0;
+    int lineno = 1;
+    while ((c = fgetc(fp)) != EOF) {
+
+
+        if (c=='\n') {
+            lineno++;
+            continue;
+        }
+
+
+        if (isdigit(c)) continue;
+
+
+        if (c=='\"') {
+            while ((c = fgetc(fp)) != EOF) {
+                if (c=='\n') lineno++;
+                if (c=='\"') break;
+            }
+            continue;
+        }
+
+
+        if (c=='\'') {
+            while ((c = fgetc(fp)) != EOF) {
+                if (c=='\'') break;
+            }
+            continue;
+        }
+
+
+        if (c=='/') {
+            c = fgetc(fp);
+            if (c=='/') {
+                while ((c = fgetc(fp)) != EOF) {
+                    if (c=='\n') {
+                        lineno++;
+                        break;
+                    }
+                }
+                continue;
+            }
+            else if (c=='*') {
+                while ((c = fgetc(fp)) != EOF) {
+                    if (c=='\n') lineno++;
+                    if (c=='*') {
+                        c = fgetc(fp);
+                        if (c=='\n') lineno++;
+                        if (c=='/') {
+                            break;
+                        } else {
+                            continue;
+                        }
+                    }
+                }
+                continue;
+            }
+        }
+
+
+        if (c=='(') {
+            while ((c = fgetc(fp)) != EOF) {
+                if (c=='\n') lineno++;
+                if (c==')') break;
+            }
+            continue;
+        }
+
+
+        if (c=='[') {
+            while ((c = fgetc(fp)) != EOF) {
+                if (c=='\n') lineno++;
+                if (c==']') break;
+            }
+            continue;
+        }
+
+
+        if (isalpha(c) || c=='_') {
+            token[0] = (char)c;
+            for (int i = 1; i < BUF_SIZE; i++) {
+                c = fgetc(fp);
+                // TODO: やる気があれば英数字以外を追加する
+                if (isalnum(c) || c=='_') {
+                    token[i] = (char)c;
+                } else {
+                    ungetc(c, fp);
+                    token[i] = '\0';
+                    break;
+                }
+            }
+        } else {
+            continue;
+        }
+
+
+        if (!strcmp(token, "echo") ||
+                !strcmp(token, "sleep") ||
+                !strcmp(token, "local") ||
+                !strcmp(token, "exit") ||
+                !strcmp(token, "error") ||
+                !strcmp(token, "readonly") )
+            continue;
+
+
+        if (!strcmp(token, "while") ||
+                !strcmp(token, "break") ||
+                !strcmp(token, "continue") ||
+                !strcmp(token, "case") ||
+                !strcmp(token, "esac") ||
+                !strcmp(token, "for") ||
+                !strcmp(token, "in") ||
+                !strcmp(token, "do") ||
+                !strcmp(token, "done") ||
+                !strcmp(token, "if") ||
+                !strcmp(token, "then") ||
+                !strcmp(token, "fi") ||
+                !strcmp(token, "else") )
+            continue;
+
+
+        if (!strcmp(token, "function")) {
+            next_symbol_is_function = 1;
+            continue;
+        }
+
+
+        if (next_symbol_is_function) {
+            param->put(PARSER_DEF,
+                    token, lineno, param->file, "function", param->arg);
+            next_symbol_is_function = 0;
+        }
+        else {
+            param->put(PARSER_REF_SYM,
+                    token, lineno, param->file, token, param->arg);
+        }
+
+
+    }
+    fclose(fp);
+
 }
